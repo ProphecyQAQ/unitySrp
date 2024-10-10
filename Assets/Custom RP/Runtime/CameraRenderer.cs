@@ -12,6 +12,7 @@ public class CameraRenderer
 	};
 
     ScriptableRenderContext context;
+    CullingResults cullingResults;
 
     Camera camera;
 
@@ -19,6 +20,11 @@ public class CameraRenderer
     {
         this.camera = camera;
         this.context = context;
+
+        if (!Cull())
+        {
+            return;
+        }
 
         Setup();
         DrawVisibleGeometry();
@@ -28,7 +34,7 @@ public class CameraRenderer
     void Setup () 
     {
 		context.SetupCameraProperties(camera);
-        
+
         buffer.ClearRenderTarget(true, true, Color.clear);
         buffer.BeginSample(bufferName);
 
@@ -51,5 +57,16 @@ public class CameraRenderer
     {
         context.ExecuteCommandBuffer(buffer); // copies the commands from the buffer
         buffer.Clear();
+    }
+
+    bool Cull()
+    {
+        ScriptableCullingParameters p;
+        if (camera.TryGetCullingParameters(out p))
+        {
+            cullingResults = context.Cull(ref p);
+            return true;
+        }
+        return false;
     }
 }
