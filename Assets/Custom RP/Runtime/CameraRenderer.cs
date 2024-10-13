@@ -22,6 +22,7 @@ public partial class CameraRenderer
         this.camera = camera;
         this.context = context;
 
+        PrepareForSceneWindow();
         if (!Cull())
         {
             return;
