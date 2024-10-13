@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 partial class CameraRenderer 
@@ -8,7 +9,10 @@ partial class CameraRenderer
     partial void DrawGizmos();
     partial void DrawUnsupportedShaders();
     partial void PrepareForSceneWindow();
+    partial void PrepareBuffer();
 #if UNITY_EDITOR
+    string sampleName { get; set; }
+
     // Shader Tag Ids
     static ShaderTagId[] legacyShaderTagIds = {
 		new ShaderTagId("Always"),
@@ -20,6 +24,13 @@ partial class CameraRenderer
 	};
 
     static Material errorMaterial;
+
+    partial void PrepareBuffer()
+    {
+        Profiler.BeginSample("Editor Only");
+        buffer.name = sampleName = camera.name;
+        Profiler.EndSample();
+    }
 
     partial void DrawUnsupportedShaders()
     {
@@ -57,5 +68,7 @@ partial class CameraRenderer
             ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
         }
     }
+#else
+    const string sampleName = camera.name;
 #endif
 }
