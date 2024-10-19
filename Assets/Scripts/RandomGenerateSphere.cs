@@ -6,6 +6,7 @@ public class RandomGenerateSphere : MonoBehaviour
 {
     // Start is called before the first frame update
     public Material[] material;
+    static MaterialPropertyBlock block;
     void Start()
     {
         for (int i = -2; i < 2; i ++)
