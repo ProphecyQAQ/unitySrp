@@ -4,9 +4,11 @@
 #include "../ShaderLibrary/Common.hlsl"
 #include "../ShaderLibrary/Surface.hlsl"
 
+#define MAX_DIRECTIONAL_LIGHT_COUNT 4
 CBUFFER_START (_CustomLight)
-    float3 _DirectionalLightColor;
-    float3 _DirectionalLightDirection;
+    int _DirectionalLightCount;
+    float4 _DirectionalLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
+    float4 _DirectionalLightDirections[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
 
 #include "../ShaderLibrary/Light.hlsl"
