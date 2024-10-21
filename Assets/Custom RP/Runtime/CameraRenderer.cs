@@ -13,6 +13,7 @@ public partial class CameraRenderer
     CullingResults cullingResults;
 
     Camera camera;
+    Lighting lighting = new Lighting();
 
     // Shader Tag Ids
     static ShaderTagId 
@@ -35,6 +36,7 @@ public partial class CameraRenderer
         }
 
         Setup();
+        lighting.Setup(context);
         DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();

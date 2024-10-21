@@ -4,6 +4,14 @@
 #include "../ShaderLibrary/Common.hlsl"
 #include "../ShaderLibrary/Surface.hlsl"
 
+CBUFFER_START (_CustomLight)
+    float3 _DirectionalLightColor;
+    float3 _DirectionalLightDirection;
+CBUFFER_END
+
+#include "../ShaderLibrary/Light.hlsl"
+#include "../ShaderLibrary/Lighting.hlsl"
+
 struct Attributes
 {
     float3 positionOS : POSITION;
@@ -58,8 +66,8 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.normal = normalize(input.normalWS);
     surface.color = base.rgb;
     surface.alpha = base.a;
-
-    return float4(surface.color, surface.alpha);
+    float3 color = GetLighting(surface);
+    return float4(color, surface.alpha);
 }
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
