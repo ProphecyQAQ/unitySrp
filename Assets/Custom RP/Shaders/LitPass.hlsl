@@ -2,6 +2,7 @@
 #define CUSTOM_LIT_PASS_INCLUDE
 
 #include "../ShaderLibrary/Common.hlsl"
+#include "../ShaderLibrary/Surface.hlsl"
 
 struct Attributes
 {
@@ -53,8 +54,12 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
 #if defined(_CLIPPING)
     clip(base.a - UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff));
 #endif
-    base.rgb = input.normalWS;
-    return normalize(base);
+    Surface surface;
+    surface.normal = normalize(input.normalWS);
+    surface.color = base.rgb;
+    surface.alpha = base.a;
+
+    return float4(surface.color, surface.alpha);
 }
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
