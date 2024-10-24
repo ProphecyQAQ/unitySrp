@@ -11,8 +11,9 @@ CBUFFER_START (_CustomLight)
     float4 _DirectionalLightDirections[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
 
-#include "../ShaderLibrary/BRDF.hlsl"
 #include "../ShaderLibrary/Light.hlsl"
+#include "../ShaderLibrary/BRDF.hlsl"
+
 #include "../ShaderLibrary/Lighting.hlsl"
 
 struct Attributes
@@ -25,6 +26,7 @@ struct Attributes
 
 struct Varyings {
 	float4 positionCS : SV_POSITION;
+    float3 positionWS : VAR_POSITION;
     float3 normalWS : VAR_NROMAL;
     float2 baseUV : VAR_BASE_UV;
 	UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -47,8 +49,8 @@ Varyings LitPassVertex(Attributes input)
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-    float3 positionWS = TransformObjectToWorld(input.positionOS);
-    output.positionCS = TransformWorldToHClip(positionWS);
+    output.positionWS = TransformObjectToWorld(input.positionOS);
+    output.positionCS = TransformWorldToHClip(output.positionWS);
     output.normalWS   = TransformObjectToWorldNormal(input.normalOS);
 
     float4 baseST = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseMap_ST);
@@ -69,6 +71,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
 #endif
     Surface surface;
     surface.normal = normalize(input.normalWS);
+    surface.viewDirection = normalize(_WorldSpaceCameraPos - input.positionWS);
     surface.color = base.rgb;
     surface.alpha = base.a;
     surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
