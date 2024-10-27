@@ -10,6 +10,7 @@ public class Lighting
 
     CommandBuffer buffer = new CommandBuffer { name = bufferName };
     CullingResults cullingResults;
+    Shadow shadows = new Shadow();
 
     const int maxDirLightCount = 4;
     static int
@@ -24,6 +25,7 @@ public class Lighting
     {
         dirLightColors[index] = visibleLight.finalColor;
         dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
+        shadows.ReserverDirectionalShadow(visibleLight.light, index);
     }
 
     void SetupLights () 
@@ -47,12 +49,18 @@ public class Lighting
         buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirections);
     }
 
-    public void Setup(ScriptableRenderContext context, CullingResults cullingResults)
+    public void Cleanup () {
+		shadows.Cleanup();
+	}
+
+    public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
     {
         this.cullingResults = cullingResults;
 
         buffer.BeginSample(bufferName);
+        shadows.Setup(context, cullingResults, shadowSettings);  
         SetupLights();
+        shadows.Render();
         buffer.EndSample(bufferName);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();

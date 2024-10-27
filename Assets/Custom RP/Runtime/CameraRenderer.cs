@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -22,7 +23,8 @@ public partial class CameraRenderer
 
     public void Render(
         ScriptableRenderContext context, Camera camera,
-        bool useDynamicBatching, bool useGPUInstancing
+        bool useDynamicBatching, bool useGPUInstancing,
+        ShadowSettings shadowSettings
     )
     {
         this.camera = camera;
@@ -30,16 +32,21 @@ public partial class CameraRenderer
 
         PrepareBuffer();
         PrepareForSceneWindow();
-        if (!Cull())
+        if (!Cull(shadowSettings.maxDistance))
         {
             return;
         }
 
+        buffer.BeginSample(sampleName);
+        ExecuteBuffer();
+        lighting.Setup(context, cullingResults, shadowSettings);
+        buffer.EndSample(sampleName);
+
         Setup();
-        lighting.Setup(context, cullingResults);
         DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();
+        lighting.Cleanup();
         Submit();
     }
 
@@ -103,11 +110,12 @@ public partial class CameraRenderer
         buffer.Clear();
     }
 
-    bool Cull()
+    bool Cull(float maxDistance)
     {
         ScriptableCullingParameters p;
         if (camera.TryGetCullingParameters(out p))
         {
+            p.shadowDistance = Mathf.Min(maxDistance, camera.farClipPlane);
             cullingResults = context.Cull(ref p);
             return true;
         }
